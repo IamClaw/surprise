@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine?</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #fff0f6, #ffeef8);
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            padding-top: 80px;
+        }
+        h1 {
+            font-size: 48px;
+            color: #ff4b84;
+            animation: fadeIn 2s ease-in-out;
+        }
+        p {
+            font-size: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            color: #5a3a3a;
+            animation: fadeIn 3s ease-in-out;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            font-size: 20px;
+            margin: 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+        .yes-btn {
+            background: #ff9bb8;
+            color: white;
+        }
+        .no-btn {
+            background: #ffdce0;
+            color: #b33a3a;
+        }
+        .btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+        }
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+            transform-origin: center;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .sad-emoji {
+            font-size: 48px;
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.9);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .sad-emoji.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .result {
+            font-size: 22px;
+            margin-top: 20px;
+            color: #944;
+            min-height: 28px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .result.show { opacity: 1; }
+
+        /* Celebration overlay for happy dancing baby GIF */
+        .celebrate {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            z-index: 2000;
+        }
+        .celebrate.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .celebrate .card {
+            background: white;
+            padding: 18px;
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 92%;
+            position: relative;
+        }
+        .celebrate img {
+            max-width: 360px;
+            width: 86%;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+        }
+        .celebrate .close {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            position: absolute;
+            right: 12px;
+            top: 8px;
+            cursor: pointer;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hey ❤️</h1>
+        <p>Hey theree. Ans this very important question Now.</p>
+        <p>Will you be my valentine Kootie??🥹 💕</p>
+
+        <button id="yesBtn" class="btn yes-btn" onclick="showResult(true)">YES 💖</button>
+        <button id="noBtn" class="btn no-btn" onclick="showResult(false)">NO 💔</button>
+
+        <div id="resultText" class="result"></div>
+        <div id="sadEmoji" class="sad-emoji" aria-hidden="true">😢</div>
+
+        <!-- celebration overlay (replace GIF URL if you prefer a different dancing baby) -->
+        <div id="celebrate" class="celebrate" aria-hidden="true">
+          <div class="card">
+            <button id="celebrateClose" class="close" aria-label="Close celebration">✕</button>
+            <img src="file:///C:/Users/Diptarko/Desktop/images.jfif" alt="Celebration cat" />
+            <div style="margin-top:12px;font-weight:600;color:#333">YAY! 🐱💃</div>
+          </div>
+        </div>
+    </div>
+
+    <script>
+      const yesBtn = document.getElementById('yesBtn');
+      const noBtn = document.getElementById('noBtn');
+      const sadEmoji = document.getElementById('sadEmoji');
+      const result = document.getElementById('resultText');
+      const celebrate = document.getElementById('celebrate');
+      const celebrateClose = document.getElementById('celebrateClose');
+
+      // user-specified image (local file)
+      const noBgPath = "file:///C:/Users/Diptarko/Desktop/edward-westbury-vfx-stranger-things-gate-grade-round-2-finished-final-but-not-big-but-also-kind-of-half-big.jpg";
+
+      let noClicks = 0;
+      const baseScale = 1;
+      const increment = 0.4; // how much Yes grows per NO click
+      const maxScale = 8; // absolute cap
+      const centerThreshold = 3.2; // when to center and dominate the screen
+      let celebrateTimeout = null;
+
+      function resetYesStyles() {
+        yesBtn.style.transition = 'transform 0.25s ease, left 0.25s ease, top 0.25s ease, padding 0.25s ease, font-size 0.25s ease';
+        yesBtn.style.transform = '';
+        yesBtn.style.position = '';
+        yesBtn.style.left = '';
+        yesBtn.style.top = '';
+        yesBtn.style.padding = '';
+        yesBtn.style.fontSize = '';
+        yesBtn.style.borderRadius = '';
+        yesBtn.style.zIndex = '';
+        yesBtn.classList.remove('pulse');
+        noBtn.style.display = '';
+
+        // restore original background
+        document.body.style.transition = 'background 0.6s ease';
+        document.body.style.background = 'linear-gradient(135deg, #fff0f6, #ffeef8)';
+        document.body.style.backgroundSize = '';
+        document.body.style.backgroundPosition = '';
+        document.body.style.backgroundRepeat = '';
+      }
+
+      function showCelebration() {
+        if (!celebrate) return;
+        celebrate.classList.add('show');
+        // auto hide after 5 seconds
+        if (celebrateTimeout) clearTimeout(celebrateTimeout);
+        celebrateTimeout = setTimeout(() => celebrate.classList.remove('show'), 5000);
+      }
+
+      function hideCelebration() {
+        if (!celebrate) return;
+        celebrate.classList.remove('show');
+        if (celebrateTimeout) clearTimeout(celebrateTimeout);
+      }
+
+      function setNoBackground() {
+        // use the provided local file path as background
+        document.body.style.transition = 'background 0.6s ease';
+        document.body.style.backgroundImage = `url('${noBgPath}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+      }
+
+      function showResult(isYes) {
+        if (isYes) {
+          noClicks = 0;
+          resetYesStyles();
+          sadEmoji.classList.remove('show');
+
+          result.textContent = "YEEEEEE!!😘😘😘😘";
+          result.classList.add('show');
+          result.style.color = "#ff4b5c";
+
+          // show dancing baby GIF celebration
+          showCelebration();
+        } else {
+          noClicks++;
+
+          // change background to user's image on NO
+          setNoBackground();
+
+          // calculate the next scale
+          let scale = Math.min(maxScale, baseScale + noClicks * increment);
+
+          // apply transform and bring to front
+          yesBtn.style.transition = 'transform 0.35s cubic-bezier(.2,.8,.2,1)';
+          yesBtn.style.transform = `scale(${scale})`;
+          yesBtn.style.zIndex = 999;
+
+          sadEmoji.classList.add('show');
+          result.classList.add('show');
+          result.style.color = "#b33a3a";
+
+          if (scale >= centerThreshold) {
+            // center & enlarge to make Yes unavoidable
+            yesBtn.style.position = 'fixed';
+            yesBtn.style.left = '50%';
+            yesBtn.style.top = '50%';
+            yesBtn.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            yesBtn.style.padding = '32px 64px';
+            yesBtn.style.fontSize = '28px';
+            yesBtn.style.borderRadius = '14px';
+            noBtn.style.display = 'none';
+
+            result.textContent = "Please... you have to click YES now 😢";
+          } else {
+            result.textContent = `Hmm... you clicked NO ${noClicks} time${noClicks>1?'s':''}.WE ARE IN UPSIDE DOWN NOW! and The YES keeps getting bigger... 💕`;
+          }
+        }
+      }
+
+      // small visual boost when hovering the big Yes
+      yesBtn.addEventListener('mouseover', ()=> {
+        if (noClicks > 0) {
+          yesBtn.style.boxShadow = '0 20px 40px rgba(0,0,0,0.18)';
+        }
+      });
+      yesBtn.addEventListener('mouseout', ()=> {
+        yesBtn.style.boxShadow = '';
+      });
+
+      // celebration close interactions
+      if (celebrateClose) celebrateClose.addEventListener('click', hideCelebration);
+      if (celebrate) celebrate.addEventListener('click', (e) => { if (e.target === celebrate) hideCelebration(); });
+    </script>
+</body>
+</html>
