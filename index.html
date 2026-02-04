@@ -4,108 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Be My Valentine?</title>
+
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #fff0f6, #ffeef8);
-            color: #333;
             text-align: center;
+            color: #333;
         }
+
         .container { padding-top: 80px; }
+
         h1 {
             font-size: 48px;
             color: #ff4b84;
-            animation: fadeIn 2s ease-in-out;
+            animation: fadeIn 2s;
         }
+
         p {
             font-size: 20px;
-            margin: 20px auto;
             max-width: 600px;
+            margin: 20px auto;
             color: #5a3a3a;
-            animation: fadeIn 3s ease-in-out;
+            animation: fadeIn 3s;
         }
+
         .btn {
-            display: inline-block;
             padding: 12px 28px;
             font-size: 20px;
             margin: 20px;
             border: none;
             cursor: pointer;
             border-radius: 30px;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
             box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            transition: transform 0.25s ease;
         }
+
         .yes-btn { background: #ff9bb8; color: white; }
         .no-btn { background: #ffdce0; color: #b33a3a; }
-        .btn:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-        }
-        .pulse { animation: pulse 1s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.25); }
-            100% { transform: scale(1); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .sad-emoji {
-            font-size: 48px;
-            margin-top: 20px;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .sad-emoji.show { opacity: 1; }
+
+        .btn:hover { transform: scale(1.05); }
+
         .result {
             font-size: 22px;
             margin-top: 20px;
-            color: #944;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.4s;
         }
+
         .result.show { opacity: 1; }
 
+        .sad-emoji {
+            font-size: 48px;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .sad-emoji.show { opacity: 1; }
+
+        /* Celebration overlay */
         .celebrate {
             position: fixed;
             inset: 0;
+            background: rgba(0,0,0,0.45);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0,0,0,0.45);
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.35s ease;
-            z-index: 2000;
+            transition: opacity 0.3s;
+            z-index: 1000;
         }
+
         .celebrate.show {
             opacity: 1;
             pointer-events: auto;
         }
-        .celebrate .card {
+
+        .card {
             background: white;
             padding: 18px;
             border-radius: 14px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            text-align: center;
             position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
-        .celebrate img {
+
+        .card img {
             max-width: 360px;
-            width: 86%;
+            width: 90%;
             border-radius: 10px;
         }
+
         .close {
             position: absolute;
-            top: 6px;
             right: 10px;
+            top: 6px;
             background: none;
             border: none;
             font-size: 22px;
             cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -114,7 +118,7 @@
 <div class="container">
     <h1>Hey ❤️</h1>
     <p>Hey theree. Ans this very important question Now.</p>
-    <p>Will you be my valentine Kootie??🥹 💕</p>
+    <p>Will you be my valentine Kootie?? 🥹 💕</p>
 
     <button id="yesBtn" class="btn yes-btn" onclick="showResult(true)">YES 💖</button>
     <button id="noBtn" class="btn no-btn" onclick="showResult(false)">NO 💔</button>
@@ -125,51 +129,54 @@
     <div id="celebrate" class="celebrate">
         <div class="card">
             <button class="close" onclick="hideCelebration()">✕</button>
-            <img src="images/celebration.jpg" alt="Celebration">
-            <div style="margin-top:12px;font-weight:600;">YAY! 🐱💃</div>
+            <img src="images/images.jfif" alt="Celebration">
+            <div style="margin-top:12px;font-weight:600;">YAYYYYY 🥳💖</div>
         </div>
     </div>
 </div>
 
 <script>
-const yesBtn = document.getElementById('yesBtn');
-const noBtn = document.getElementById('noBtn');
-const sadEmoji = document.getElementById('sadEmoji');
-const result = document.getElementById('resultText');
-const celebrate = document.getElementById('celebrate');
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const result = document.getElementById("resultText");
+const sadEmoji = document.getElementById("sadEmoji");
+const celebrate = document.getElementById("celebrate");
 
-const noBgPath = "images/upside-down.jpg";
+const noBgPath =
+"images/edward-westbury-vfx-stranger-things-gate-grade-round-2-finished-final-but-not-big-but-also-kind-of-half-big.jpg";
+
 let noClicks = 0;
-
-function showCelebration() {
-    celebrate.classList.add('show');
-    setTimeout(() => celebrate.classList.remove('show'), 5000);
-}
-
-function hideCelebration() {
-    celebrate.classList.remove('show');
-}
 
 function setNoBackground() {
     document.body.style.backgroundImage = `url('${noBgPath}')`;
-    document.body.style.backgroundSize = 'cover';
-    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+}
+
+function showCelebration() {
+    celebrate.classList.add("show");
+    setTimeout(() => celebrate.classList.remove("show"), 5000);
+}
+
+function hideCelebration() {
+    celebrate.classList.remove("show");
 }
 
 function showResult(isYes) {
     if (isYes) {
         noClicks = 0;
+        document.body.style.background =
+            "linear-gradient(135deg, #fff0f6, #ffeef8)";
         result.textContent = "YEEEEEE!! 😘😘😘";
-        result.classList.add('show');
-        sadEmoji.classList.remove('show');
-        document.body.style.background = 'linear-gradient(135deg, #fff0f6, #ffeef8)';
+        result.classList.add("show");
+        sadEmoji.classList.remove("show");
         showCelebration();
     } else {
         noClicks++;
         setNoBackground();
-        sadEmoji.classList.add('show');
+        sadEmoji.classList.add("show");
         result.textContent = "Please click YES now 😢";
-        result.classList.add('show');
+        result.classList.add("show");
         yesBtn.style.transform = `scale(${1 + noClicks * 0.4})`;
     }
 }
